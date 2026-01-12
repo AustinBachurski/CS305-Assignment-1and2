@@ -3,20 +3,27 @@
 
 #include <cstdint>
 #include <format>
+#include <vector>
 
 
+struct Process
+{
+    uint8_t processID{};
+    uint8_t relativeDeadline{};
+    uint8_t period{};
+};
 
-
-
-
-
-
+struct ProcessData
+{
+    std::size_t executionTime{};
+    std::vector<unsigned> completionTimes;
+};
 
 // The std::formatter object is required by the std::print and std::println functions ot the 
 // C++ Standard Template Library.  It defines how the object will be printed.
-// In this case, it is the JobState object.
+// In this case, it is the Process object.
 template<>
-struct std::formatter<JobState>
+struct std::formatter<Process>
 {
     // `parse` defines behavior for format strings, unnecessary for this object.
     constexpr auto parse(std::format_parse_context& context)
@@ -25,41 +32,17 @@ struct std::formatter<JobState>
     }
 
     // `format` defines the output that will be printed by std::print/std::println
-    auto format(JobState const& state, std::format_context& context) const
+    auto format(Process const& process, std::format_context& context) const
     {
-        switch (state)
-        {
-            case JobState::end:
-                return std::format_to(context.out(), "End");
-
-            case JobState::queued:
-                return std::format_to(context.out(), "Queued");
-
-            case JobState::running:
-            {
-                return std::format_to(context.out(), "Running");
-            }
-
-            case JobState::open:
-            {
-                return std::format_to(context.out(), "Open");
-            }
-
-            case JobState::blocked:
-                return std::format_to(context.out(), "Blocked");
-
-            case JobState::sleeping:
-                return std::format_to(context.out(), "Sleeping");
-        }
-        return std::format_to(context.out(), "Undefined case in formatter!");
+        return std::format_to(context.out(), "Process {}, Period-{}: ", process.processID, process.period);
     }
 };
 
 // The std::formatter object is required by the std::print and std::println functions ot the 
 // C++ Standard Template Library.  It defines how the object will be printed.
-// In this case, it is the Job object.
+// In this case, it is the ProcessData object.
 template<>
-struct std::formatter<Job>
+struct std::formatter<ProcessData>
 {
     // `parse` defines behavior for format strings, unnecessary for this object.
     constexpr auto parse(std::format_parse_context& context)
@@ -68,16 +51,9 @@ struct std::formatter<Job>
     }
 
     // `format` defines the output that will be printed by std::print/std::println
-    auto format(Job const& job, std::format_context& context) const
+    auto format(ProcessData const& data, std::format_context& context) const
     {
-        if (job.jobType == JobType::job)
-        {
-            return std::format_to(context.out(), "Job {} - {}", job.jobID, job.currentState);
-        }
-        else
-        {
-            return std::format_to(context.out(), "File {} - {}", job.jobID, job.currentState);
-        }
+        return std::format_to(context.out(), "ExecutionTime-{}, CompletionTimes-{}", data.executionTime, data.completionTimes);
     }
 };
 
