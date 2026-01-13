@@ -6,6 +6,7 @@ target_sources(assignment3 PRIVATE
     main.cpp
     scheduler.cpp
     schedulerDemo.cpp
+    schedulingAlgorithm.cpp
 )
 
 target_compile_options(assignment3 PRIVATE
