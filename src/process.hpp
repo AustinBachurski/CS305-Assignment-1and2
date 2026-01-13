@@ -1,23 +1,22 @@
 #ifndef PROCESS_HPP
 #define PROCESS_HPP
 
-#include <cstdint>
 #include <format>
 #include <vector>
 
 
 struct Process
 {
-    uint8_t processID{};
-    uint8_t relativeDeadline{};
-    uint8_t period{};
-    uint8_t priority{};
+    unsigned processID{};
+    unsigned relativeDeadline{};
+    unsigned period{};
+    unsigned priority{};
 };
 
 struct ProcessComparitor
 {
     [[nodiscard]]
-    bool operator() (Process const left, Process const right) const
+    bool operator() (Process const &left, Process const &right) const
     {
         return left.priority < right.priority;
     }
@@ -42,7 +41,7 @@ struct std::formatter<Process>
     }
 
     // `format` defines the output that will be printed by std::print/std::println
-    auto format(Process const& process, std::format_context& context) const
+    auto format(Process const &process, std::format_context &context) const
     {
         return std::format_to(context.out(), "Process {}, Period-{}: ", process.processID, process.period);
     }
@@ -61,7 +60,7 @@ struct std::formatter<ProcessData>
     }
 
     // `format` defines the output that will be printed by std::print/std::println
-    auto format(ProcessData const& data, std::format_context& context) const
+    auto format(ProcessData const &data, std::format_context &context) const
     {
         return std::format_to(context.out(), "ExecutionTime-{}, CompletionTimes-{}", data.executionTime, data.completionTimes);
     }
