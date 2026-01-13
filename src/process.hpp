@@ -11,6 +11,16 @@ struct Process
     uint8_t processID{};
     uint8_t relativeDeadline{};
     uint8_t period{};
+    uint8_t priority{};
+};
+
+struct ProcessComparitor
+{
+    [[nodiscard]]
+    bool operator() (Process const left, Process const right) const
+    {
+        return left.priority < right.priority;
+    }
 };
 
 struct ProcessData
