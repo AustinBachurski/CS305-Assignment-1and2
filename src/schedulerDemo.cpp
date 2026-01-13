@@ -1,14 +1,14 @@
-#include "memoryManager.hpp"
-#include "job.hpp"
+#include "scheduler.hpp"
+#include "process.hpp"
 
+#include <algorithm>
 #include <charconv>
-#include <cstdint>
 #include <cstdlib>
-#include <deque>
 #include <filesystem>
 #include <fstream>
 #include <print>
 #include <ranges>
+#include <span>
 #include <string>
 #include <string_view>
 
@@ -29,9 +29,9 @@ void invalidInput(std::string_view const line)
 }
 
 // Helper function that parses a string to a number.
-uint8_t parseField(std::string_view const field, std::string_view const line)
+unsigned parseField(std::string_view const field, std::string_view const line)
 {
-    uint8_t value{};
+    unsigned value{};
 
     if (!(std::from_chars(field.data(), field.data() + field.size(), value).ec == std::errc{}))
     {
@@ -43,50 +43,33 @@ uint8_t parseField(std::string_view const field, std::string_view const line)
 
 
 // Helper function to create a Job object as an application.
-Job makeJob(std::string_view const line)
+Process makeProcess(std::string_view const line)
 {
     auto fields = line | std::views::split(',')
                        | std::views::transform([](auto&& split_view)
                              { return std::string_view{ split_view }; });
 
-    Job job;
+    Process process;
 
     auto fieldsIter{ fields.begin() };
 
-    auto next{ [&fieldsIter, &fields, line]()
+    auto nextField{ [&fieldsIter, &fields, line]()
     {
         if (fieldsIter == fields.end()) { invalidInput(line); }
         return *fieldsIter++;
     }};
 
-    job.jobID = parseField(next(), line);
-    job.startTime = parseField(next(), line);
-    job.memorySize = parseField(next(), line);
-    job.runTime = parseField(next(), line);
+    process.processID = parseField(nextField(), line);
+    process.relativeDeadline = parseField(nextField(), line);
+    process.period = parseField(nextField(), line);
 
-    auto lastField{ next() };
-
-    if (lastField == "End")
-    {
-        job.endState = JobState::end;
-    }
-    else if (lastField == "Sleep")
-    {
-        job.endState = JobState::sleeping;
-    }
-    else
-    {
-        invalidInput(line);
-    }
-
-    job.currentState = JobState::queued;
-    return job;
+    return process;
 }
 
 // Helper function that creates a queue of Job objects by reading data from an input file.
-std::deque<Job> getJobsFromFile(std::filesystem::path filePath)
+std::vector<Process> getProcessesFromFile(std::filesystem::path filePath)
 {
-    std::deque<Job> jobs;
+    std::vector<Process> processes;
 
     if (!std::filesystem::exists(filePath))
     {
@@ -108,100 +91,49 @@ std::deque<Job> getJobsFromFile(std::filesystem::path filePath)
 
     while (std::getline(file, line))
     {
-        jobs.push_back(makeJob(line));
+        processes.push_back(makeProcess(line));
     }
 
-    return jobs;
+    return processes;
 }
 
-// Helper function to create a Job object as a file.
-Job makeFile(std::string_view const line)
+void preloadProcesses(std::span<Process const> processes, Scheduler &scheduler)
 {
-    auto fields = line | std::views::split(',')
-                       | std::views::transform([](auto&& split_view)
-                             { return std::string_view{ split_view }; });
-
-    Job job;
-
-    auto fieldsIter{ fields.begin() };
-
-    auto next{ [&fieldsIter, &fields, line]()
+    for (auto const& process : processes)
     {
-        if (fieldsIter == fields.end()) { invalidInput(line); }
-        return *fieldsIter++;
-    }};
-
-    job.jobID = parseField(next(), line);
-    job.startTime = parseField(next(), line);
-    job.runTime = parseField(next(), line);
-
-    // Calculate file size; since the instructions define the size to be equal
-    // to 1, just sum the number of blocks.
-    while (fieldsIter++ != fields.end())
-    {
-        ++job.memorySize;
+        scheduler.queueProcess(process);
     }
-
-    job.jobType = JobType::file;
-    job.currentState = JobState::queued;
-    return job;
 }
 
-// Helper function to read the pseudo-file data from an input file.
-void getFilesFromFile(std::deque<Job>& jobs, std::filesystem::path filePath)
+Process soonestPeriodProcess(std::span<Process const> processes, unsigned const clock)
 {
-    if (!std::filesystem::exists(filePath))
-    {
-        std::println("Input file not found: {}!", filePath.string());
-        std::exit(1);
-    }
-
-    std::ifstream file{ filePath };
-
-    if (!file.is_open())
-    {
-        std::println("Failed to open input file: {}!", filePath.string());
-        std::exit(1);
-    }
-
-    std::string line;
-
-    std::getline(file, line);  // Skip csv header.
-
-    while (std::getline(file, line))
-    {
-        jobs.push_back(makeFile(line));
-    }
+    return *std::ranges::min_element(processes, [clock](Process const& left, Process const& right)
+             {
+                return clock % left.period <= clock % right.period;
+             });;
 }
 
 }  // Anonymous Namespace
 
 
 // Function that demonstrates memory management and operating system functionality.
-void demo()
+void demo(std::function<unsigned(Process const, unsigned const)> algorithm, unsigned const serviceTime)
 {
-    MemoryManager memory;
+    unsigned clock{};
+    Scheduler scheduler(algorithm, clock);
+    scheduler.setServiceTime(serviceTime);
 
-    std::deque<Job> jobs = getJobsFromFile("data/inputJobs.csv");
-    getFilesFromFile(jobs, "data/inputFiles.csv");
+    std::vector<Process> processes{ getProcessesFromFile("data/input.csv") };
+    preloadProcesses(processes, scheduler);
 
-    uint8_t currentTime = 0;
-
-    while(true)
+    while (clock < serviceTime && scheduler.tick())
     {
-        memory.updateState(currentTime);
-        memory.displayMemoryState(currentTime);
-        ++currentTime;
-        memory.displayStaged(currentTime, jobs);
-        memory.performStagedActions(currentTime, jobs);
-
-        if (jobs.empty() && memory.allSleeping())
+        if (Process next{ soonestPeriodProcess(processes, clock) }; clock % next.period == 0)
         {
-            memory.displayMemoryState(currentTime);
-            memory.displayStaged(currentTime, jobs);
-            std::println("Nothing more to do...\n");
-            return;
+            scheduler.queueProcess(next);
         }
     }
+
+    scheduler.report();
 }
 
