@@ -32,19 +32,32 @@ void Scheduler::queueProcess(Process process)
 
 void Scheduler::report()
 {
-    if (currentProcess.relativeDeadline < clock)
+    if (currentProcess.processID && currentProcess.relativeDeadline < clock)
     {
-        std::println("**Schedule is feasible from 0 to {} when process {} did not meet it's deadline.**", clock, currentProcess.processID);
+        std::println("- Schedule is feasible from 0 to {} when process {} did not meet it's deadline of {}.", clock, currentProcess.processID, currentProcess.relativeDeadline);
     }
     else
     {
-        std::println("**Schedule is feasible from 0 to {} without failure.**", clock);
+        std::println("- Schedule is feasible from 0 to {} without failure.", clock);
     }
+
+    std::size_t idleTime{};
+    std::size_t runTime{};
 
     for (auto const& [process, processData] : tracking)
     {
-         std::println("- {}{}", process, processData);
+        if (process.processID)
+        {
+            runTime += processData.executionTime;
+            std::println("   {}{}", process, processData);
+        }
+        else
+        {
+            idleTime += processData.executionTime;
+        }
     }
+
+    std::println("- CPU Usage Time-{}, CPU Idle Time-{}\n", runTime, idleTime);
 }
 
 void Scheduler::setServiceTime(unsigned const time)
@@ -57,6 +70,7 @@ bool Scheduler::tick()
     // Increment the current clock and the run time tracking for the current process.
     // If processID is zero, we're tracking idle time.
     ++clock;
+    ++currentProcess.runTime;
     ++tracking[currentProcess].executionTime;
 
     // CPU is idle.
@@ -73,7 +87,7 @@ bool Scheduler::tick()
 
 
     // Process complete.
-    if (tracking[currentProcess].executionTime == serviceTime)
+    if (currentProcess.runTime == serviceTime)
     {
         tracking[currentProcess].completionTimes.push_back(clock);
 

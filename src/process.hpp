@@ -3,13 +3,13 @@
 
 #include <compare>
 #include <format>
-#include <functional>
 #include <vector>
 
 
 struct Process
 {
     unsigned processID{};
+    unsigned runTime{};
     unsigned relativeDeadline{};
     unsigned period{};
     unsigned priority{};
