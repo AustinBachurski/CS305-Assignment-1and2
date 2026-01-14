@@ -1,0 +1,7 @@
+Scheduler Report for Rate Monotonic scheduler with process service time of 15.
+- Schedule is feasible from 0 to 76 when process 1 did not meet it's deadline of 50.
+   Process 1: Period-100, ExecutionTime-1, CompletionTimes-[]
+   Process 4: Period-20, ExecutionTime-60, CompletionTimes-[15, 35, 55, 75]
+   Process 5: Period-140, ExecutionTime-15, CompletionTimes-[60]
+- CPU Usage Time-76, CPU Idle Time-0
+

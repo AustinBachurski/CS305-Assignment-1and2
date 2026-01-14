@@ -1,0 +1,9 @@
+Scheduler Report for Earliest Deadline First scheduler with process service time of 15.
+- Schedule is feasible from 0 to 181 when process 4 did not meet it's deadline of 100.
+   Process 1: Period-100, ExecutionTime-15, CompletionTimes-[15]
+   Process 2: Period-99, ExecutionTime-15, CompletionTimes-[114]
+   Process 3: Period-80, ExecutionTime-15, CompletionTimes-[75]
+   Process 4: Period-20, ExecutionTime-106, CompletionTimes-[35, 55, 90, 129, 144, 165, 180]
+   Process 5: Period-140, ExecutionTime-30, CompletionTimes-[60, 159]
+- CPU Usage Time-181, CPU Idle Time-0
+

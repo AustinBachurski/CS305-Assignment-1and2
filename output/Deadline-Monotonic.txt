@@ -1,0 +1,9 @@
+Scheduler Report for Deadline Monotonic scheduler with process service time of 15.
+- Schedule is feasible from 0 to 115 when process 3 did not meet it's deadline of 105.
+   Process 1: Period-100, ExecutionTime-15, CompletionTimes-[15]
+   Process 2: Period-99, ExecutionTime-15, CompletionTimes-[114]
+   Process 3: Period-80, ExecutionTime-10, CompletionTimes-[]
+   Process 4: Period-20, ExecutionTime-60, CompletionTimes-[35, 55, 75, 95]
+   Process 5: Period-140, ExecutionTime-15, CompletionTimes-[60]
+- CPU Usage Time-115, CPU Idle Time-0
+
