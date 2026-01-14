@@ -1,7 +1,9 @@
 #ifndef PROCESS_HPP
 #define PROCESS_HPP
 
+#include <compare>
 #include <format>
+#include <functional>
 #include <vector>
 
 
@@ -11,14 +13,32 @@ struct Process
     unsigned relativeDeadline{};
     unsigned period{};
     unsigned priority{};
+
+    auto operator<=>(Process const &other) const noexcept
+    {
+        return processID <=> other.processID;
+    }
+
+    bool operator==(Process const &other) const noexcept
+    {
+        return processID == other.processID;
+    }
 };
 
-struct ProcessComparitor
+struct ProcessPriorityComparitor
 {
     [[nodiscard]]
-    bool operator() (Process const &left, Process const &right) const
+    bool operator() (Process const &left, Process const &right) const noexcept
     {
         return left.priority < right.priority;
+    }
+};
+
+struct ProcessMapComparitor
+{
+    bool operator()(Process const &left, Process const &right) const noexcept
+    {
+        return left.processID < right.processID;
     }
 };
 
@@ -43,7 +63,7 @@ struct std::formatter<Process>
     // `format` defines the output that will be printed by std::print/std::println
     auto format(Process const &process, std::format_context &context) const
     {
-        return std::format_to(context.out(), "Process {}, Period-{}: ", process.processID, process.period);
+        return std::format_to(context.out(), "Process {}: Period-{}, ", process.processID, process.period);
     }
 };
 

@@ -6,27 +6,27 @@
 #include <deque>
 #include <functional>
 #include <queue>
-#include <unordered_map>
+#include <map>
 
 
 // Scheduler class that manages scheduling CPU time.
 class Scheduler
 {
 public:
-    using SchedulingAlgorithm = std::function<unsigned(Process const, unsigned const)>;
-    explicit Scheduler(SchedulingAlgorithm schedulingAlgorithm, unsigned &clock);
+    using SchedulerAlgorithm = std::function<unsigned(Process const, unsigned const)>;
+    explicit Scheduler(SchedulerAlgorithm schedulingAlgorithm, unsigned &clock);
     void queueProcess(Process process);
     void report();
     void setServiceTime(unsigned const time);
     bool tick();
 
 private:
-    SchedulingAlgorithm algorithm;
+    SchedulerAlgorithm algorithm;
     unsigned &clock;
     Process currentProcess{};
-    std::priority_queue<Process, std::deque<Process>, ProcessComparitor> processQueue;
+    std::priority_queue<Process, std::deque<Process>, ProcessPriorityComparitor> processQueue;
     unsigned serviceTime{};
-    std::unordered_map<unsigned, ProcessData> tracking;
+    std::map<Process, ProcessData, ProcessMapComparitor> tracking;
 };
 
 #endif
