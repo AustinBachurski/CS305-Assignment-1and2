@@ -4,6 +4,7 @@
 #include <functional>
 #include <print>
 
+// The methods in this file are described with comments in `scheduler.hpp`.
 
 Scheduler::Scheduler(SchedulerAlgorithm schedulingAlgorithm, unsigned &systemClock)
 : algorithm{ schedulingAlgorithm }
@@ -12,7 +13,9 @@ Scheduler::Scheduler(SchedulerAlgorithm schedulingAlgorithm, unsigned &systemClo
 
 void Scheduler::queueProcess(Process process)
 {
+    // Call the scheduling algorithm function.
     process.priority = std::invoke(algorithm, process, clock);
+
     process.relativeDeadline = clock + process.relativeDeadline;
 
     if (!currentProcess.processID)

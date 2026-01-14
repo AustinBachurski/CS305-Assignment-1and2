@@ -6,6 +6,7 @@
 #include <vector>
 
 
+// Process object representing a task for the CPU to perform.
 struct Process
 {
     unsigned processID{};
@@ -14,17 +15,21 @@ struct Process
     unsigned period{};
     unsigned priority{};
 
+    // Provides comparison functions based on the processID field.
     auto operator<=>(Process const &other) const noexcept
     {
         return processID <=> other.processID;
     }
 
+    // Spaceship operator `<=>` only produces strong ordering if all fields
+    // are used.  So we have to explicitly define equality.
     bool operator==(Process const &other) const noexcept
     {
         return processID == other.processID;
     }
 };
 
+// This functor is used by the scheduler's priority queue to sort Process objects.
 struct ProcessPriorityComparitor
 {
     [[nodiscard]]
@@ -34,6 +39,7 @@ struct ProcessPriorityComparitor
     }
 };
 
+// This functor is used by the tracking map to sort Process objects.
 struct ProcessMapComparitor
 {
     bool operator()(Process const &left, Process const &right) const noexcept
@@ -42,6 +48,7 @@ struct ProcessMapComparitor
     }
 };
 
+// This struct holds the tracking information for a process.
 struct ProcessData
 {
     std::size_t executionTime{};

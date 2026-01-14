@@ -42,8 +42,7 @@ unsigned parseField(std::string_view const field, std::string_view const line)
     return value;
 }
 
-
-// Helper function to create a Job object as an application.
+// Helper function to create a Process object from the CSV input.
 Process makeProcess(std::string_view const line)
 {
     auto fields = line | std::views::split(',')
@@ -67,7 +66,7 @@ Process makeProcess(std::string_view const line)
     return process;
 }
 
-// Helper function that creates a queue of Job objects by reading data from an input file.
+// Helper function that creates a vector of Process objects by reading data from an input file.
 std::vector<Process> getProcessesFromFile(std::filesystem::path filePath)
 {
     std::vector<Process> processes;
@@ -98,6 +97,7 @@ std::vector<Process> getProcessesFromFile(std::filesystem::path filePath)
     return processes;
 }
 
+// Queue all processes at time zero.
 void preloadProcesses(std::span<Process const> processes, Scheduler &scheduler)
 {
     for (auto const& process : processes)
@@ -106,6 +106,7 @@ void preloadProcesses(std::span<Process const> processes, Scheduler &scheduler)
     }
 }
 
+// Select the next process to be queued based on the current time and the process period.
 Process soonestPeriodProcess(std::span<Process const> processes, unsigned const clock)
 {
     return *std::ranges::min_element(processes, [clock](Process const& left, Process const& right)
@@ -114,6 +115,7 @@ Process soonestPeriodProcess(std::span<Process const> processes, unsigned const 
              });;
 }
 
+// Convert the algorithm flag to the algorithm name for reporting.
 std::string_view algorithmName(std::string_view algorithmFlag)
 {
     if (algorithmFlag == "--RMS")

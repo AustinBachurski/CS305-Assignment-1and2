@@ -1,6 +1,7 @@
 #include "schedulingAlgorithms.hpp"
 #include "process.hpp"
 
+// Functions are described with comments in `schedulingAlgorithms.hpp`.
 
 unsigned SchedulingAlgorithm::rateMonotonic(Process process, [[maybe_unused]] unsigned const clock)
 {
