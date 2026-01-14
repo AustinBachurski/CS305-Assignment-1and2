@@ -1,4 +1,4 @@
-# Computer Science 305 via Study.com - Assignment 2: Building Simple Operating System Functionality
+# Computer Science 305 via Study.com - Assignment 3: Development of Real-Time Scheduling Simulator
 
 ## Required Tooling
 
@@ -22,13 +22,19 @@
 1. Clone the repository.
 1. Create a build directory: `cmake -B build`
 1. Build the project: `cmake --build build`
-1. Run the application: `./build/bin/assignment2`
+1. Run the application with the appropriate flags: `./build/bin/assignment3 <--algorithm_flag> <service_time>`
+
+#### Flags
+
+- `--RMS` *- Rate Monotonic Scheduler*
+- `--DMS` *- Deadline Monotonic Scheduler*
+- `--EDF` *- Earliest Deadline First Scheduler*
+- Following the algorithm flag, include the Service Time for each process as an integral value.
+> Usage example: `./build/bin/assignment3 --RMS 15`
 
 ## Output
 
-When running with the included `run.sh` shell script, the program will be executed and the output will be saved to a `.txt` file in the `output` directory as shown below.
-
-Remaining execution time for running jobs is described by the number of `.` characters following the job state.  For example, a running job with 3 seconds of execution left is represented by `Running...`.
+When running with the included `run.sh` shell script, the program will be executed and the output will be saved to a `.txt` file in the `output` directory for each algorithm.
 
 ![Demo of running jobs.](screenshots/demo.png)
 
