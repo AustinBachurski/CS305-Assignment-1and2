@@ -1,6 +1,6 @@
 Process Number,Arrival Time,Relative Deadline,Period
-1,8,12
-2,10,20
-3,10,25
-4,15,28
-5,20,32
+1,80,12
+2,100,20
+3,100,25
+4,150,28
+5,200,32
