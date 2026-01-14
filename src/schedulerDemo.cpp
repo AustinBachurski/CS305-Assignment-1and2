@@ -9,6 +9,7 @@
 #include <print>
 #include <ranges>
 #include <span>
+#include <stdexcept>
 #include <string>
 #include <string_view>
 
@@ -113,11 +114,30 @@ Process soonestPeriodProcess(std::span<Process const> processes, unsigned const 
              });;
 }
 
+std::string_view algorithmName(std::string_view algorithmFlag)
+{
+    if (algorithmFlag == "--RMS")
+    {
+        return "Rate Monotonic";
+    }
+    else if (algorithmFlag == "--DMS")
+    {
+        return "Deadline Monotonic";
+    }
+    else if (algorithmFlag == "--EDF")
+    {
+        return "Earliest Deadline First";
+    }
+
+    throw std::invalid_argument('<' + std::string{ algorithmFlag } + "> is not a valid flag.");
+}
+
 }  // Anonymous Namespace
 
 
 // Function that demonstrates memory management and operating system functionality.
-void demo(std::function<unsigned(Process const, unsigned const)> algorithm, unsigned const serviceTime)
+void demo(std::function<unsigned(Process const, unsigned const)> algorithm,
+          unsigned const serviceTime, std::string_view algorithmFlag)
 {
     unsigned clock{};
     Scheduler scheduler(algorithm, clock);
@@ -126,7 +146,7 @@ void demo(std::function<unsigned(Process const, unsigned const)> algorithm, unsi
     std::vector<Process> processes{ getProcessesFromFile("data/input.csv") };
     preloadProcesses(processes, scheduler);
 
-    while (clock < serviceTime && scheduler.tick())
+    while (scheduler.tick())
     {
         if (Process next{ soonestPeriodProcess(processes, clock) }; clock % next.period == 0)
         {
@@ -134,6 +154,7 @@ void demo(std::function<unsigned(Process const, unsigned const)> algorithm, unsi
         }
     }
 
+    std::println("Scheduler Report for {} scheduler with process service times of {}.", algorithmName(algorithmFlag), serviceTime);
     scheduler.report();
 }
 

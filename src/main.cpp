@@ -7,8 +7,9 @@
 #include <functional>
 #include <print>
 
-
-void demo(std::function<unsigned(Process const, unsigned const)>, unsigned const serviceTime); // Forward declaration for the `demo` function.
+// Forward declaration for the `demo` function.
+void demo(std::function<unsigned(Process const, unsigned const)>,
+          unsigned const serviceTime, std::string_view algorithmFlag);
 
 template<std::unsigned_integral T>
 bool argvIsNumber(std::string_view argv, T& valueOut)
@@ -31,15 +32,15 @@ int main(int argc, char **argv)   // Program entry point.
     }
     else if (std::strcmp(argv[1], "--RMS") == 0)
     {
-        demo(SchedulingAlgorithm::rateMonotonic, serviceTime);
+        demo(SchedulingAlgorithm::rateMonotonic, serviceTime, argv[1]);
     }
     else if (std::strcmp(argv[1], "--DMS") == 0)
     {
-        demo(SchedulingAlgorithm::deadlineMonotonic, serviceTime);
+        demo(SchedulingAlgorithm::deadlineMonotonic, serviceTime, argv[1]);
     }
     else if (std::strcmp(argv[1], "--EDF") == 0)
     {
-        demo(SchedulingAlgorithm::earliestDeadlineFirst, serviceTime);
+        demo(SchedulingAlgorithm::earliestDeadlineFirst, serviceTime, argv[1]);
     }
     else
     {
