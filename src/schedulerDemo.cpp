@@ -139,6 +139,7 @@ std::string_view algorithmName(std::string_view algorithmFlag)
 void demo(std::function<unsigned(Process const, unsigned const)> algorithm,
           unsigned const serviceTime, std::string_view algorithmFlag)
 {
+    constexpr unsigned maximumRunTime{ 3000 };
     unsigned clock{};
     Scheduler scheduler(algorithm, clock);
     scheduler.setServiceTime(serviceTime);
@@ -146,7 +147,7 @@ void demo(std::function<unsigned(Process const, unsigned const)> algorithm,
     std::vector<Process> processes{ getProcessesFromFile("data/input.csv") };
     preloadProcesses(processes, scheduler);
 
-    while (scheduler.tick())
+    while (scheduler.tick() && clock < maximumRunTime)
     {
         if (Process next{ soonestPeriodProcess(processes, clock) }; clock % next.period == 0)
         {
@@ -154,7 +155,7 @@ void demo(std::function<unsigned(Process const, unsigned const)> algorithm,
         }
     }
 
-    std::println("Scheduler Report for {} scheduler with process service times of {}.", algorithmName(algorithmFlag), serviceTime);
+    std::println("Scheduler Report for {} scheduler with process service time of {}.", algorithmName(algorithmFlag), serviceTime);
     scheduler.report();
 }
 
